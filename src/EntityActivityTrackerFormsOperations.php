@@ -49,34 +49,15 @@ class EntityActivityTrackerFormsOperations implements ContainerInjectionInterfac
   protected $currentUser;
 
   /**
-   * Constructs a new EntityActivityTrackerFormsOperations instance.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager service.
-   * @param \Drupal\entity_activity_tracker\ActivityRecordStorageInterface $activity_record_storage
-   *   The activity record storage service.
-   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
-   *   The messenger.
-   * @param \Drupal\Core\Session\AccountProxyInterface|null $current_user
-   *   The current logged user.
-   */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ActivityRecordStorageInterface $activity_record_storage, MessengerInterface $messenger, AccountProxyInterface $current_user) {
-    $this->entityTypeManager = $entity_type_manager;
-    $this->activityRecordStorage = $activity_record_storage;
-    $this->messenger = $messenger;
-    $this->currentUser = $current_user;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity_type.manager'),
-      $container->get('entity_activity_tracker.activity_record_storage'),
-      $container->get('messenger'),
-      $container->get('current_user')
-    );
+    $instance = new static();
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->activityRecordStorage = $container->get('entity_activity_tracker.activity_record_storage');
+    $instance->messenger = $container->get('messenger');
+    $instance->currentUser = $container->get('current_user');
+    return $instance;
   }
 
   /**

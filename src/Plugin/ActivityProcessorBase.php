@@ -36,24 +36,12 @@ abstract class ActivityProcessorBase extends PluginBase implements ActivityProce
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ActivityRecordStorageInterface $activity_record_storage, EntityTypeManagerInterface $entity_type_manager) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->activityRecordStorage = $activity_record_storage;
-    $this->entityTypeManager = $entity_type_manager;
-    $this->setConfiguration($configuration);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_activity_tracker.activity_record_storage'),
-      $container->get('entity_type.manager')
-    );
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->activityRecordStorage = $container->get('entity_activity_tracker.activity_record_storage');
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->setConfiguration($configuration);
+    return $instance;
   }
 
   /**

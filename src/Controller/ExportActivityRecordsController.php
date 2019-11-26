@@ -30,26 +30,13 @@ class ExportActivityRecordsController extends ControllerBase {
   protected $filesystemSettigns;
 
   /**
-   * Constructs a new GroupMembershipController.
-   *
-   * @param \Drupal\Core\Database\Driver\mysql\Connection $database
-   *   The active database connection.
-   * @param \Drupal\Core\Config\ImmutableConfig $filesystem_settings
-   *   The 'system.file' config.
-   */
-  public function __construct(Connection $database, ImmutableConfig $filesystem_settings) {
-    $this->database = $database;
-    $this->filesystemSettigns = $filesystem_settings;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('database'),
-      $container->get('config.factory')->get('system.file')
-    );
+    $instance = new static();
+    $instance->database = $container->get('database');
+    $instance->filesystemSettigns = $container->get('config.factory')->get('system.file');
+    return $instance;
   }
 
   /**

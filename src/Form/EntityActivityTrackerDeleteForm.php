@@ -32,30 +32,14 @@ class EntityActivityTrackerDeleteForm extends EntityConfirmFormBase {
   protected $cacheBackend;
 
   /**
-   * Overridden constructor to get event dispactcher service.
-   *
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
-   *   The event dispatcher.
-   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
-   *   The messenger.
-   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
-   *   Cache backend instance to use.
-   */
-  public function __construct(EventDispatcherInterface $event_dispatcher, MessengerInterface $messenger, CacheBackendInterface $cache_backend) {
-    $this->eventDispatcher = $event_dispatcher;
-    $this->messenger = $messenger;
-    $this->cacheBackend = $cache_backend;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('event_dispatcher'),
-      $container->get('messenger'),
-      $container->get('cache.default')
-    );
+    $instance = new static();
+    $instance->eventDispatcher = $container->get('event_dispatcher');
+    $instance->messenger = $container->get('messenger');
+    $instance->cacheBackend = $container->get('cache.default');
+    return $instance;
   }
 
   /**

@@ -33,36 +33,13 @@ class TrackedEntity extends FieldPluginBase implements ContainerFactoryPluginInt
   protected $activityRecordStorage;
 
   /**
-   * Constructs a new TrackedEntity field plugin.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\entity_activity_tracker\ActivityRecordStorageInterface $activity_record_storage
-   *   The activity record storage service.
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, ActivityRecordStorageInterface $activity_record_storage) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->entityTypeManager = $entity_type_manager;
-    $this->activityRecordStorage = $activity_record_storage;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_type.manager'),
-      $container->get('entity_activity_tracker.activity_record_storage')
-    );
+    $instance = new static($configuration,$plugin_id,$plugin_definition);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->activityRecordStorage = $container->get('entity_activity_tracker.activity_record_storage');
+    return $instance;
   }
 
   /**
