@@ -36,6 +36,7 @@ class EntityDecay extends ActivityProcessorBase implements ActivityProcessorInte
       'decay' => 5,
     // 4 days;
       'decay_granularity' => 345600,
+      'decay_threshold' => 0,
     ];
   }
 
@@ -72,6 +73,15 @@ class EntityDecay extends ActivityProcessorBase implements ActivityProcessorInte
       '#description' => $this->t('The time in seconds that the activity value is kept before applying the decay.'),
       '#required' => TRUE,
     ];
+
+    $form['decay_threshold'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Decay Threshold'),
+      '#default_value' => $this->getConfiguration()['decay_threshold'],
+      '#description' => $this->t('Value to stop decay.'),
+      '#required' => TRUE,
+    ];
+
     return $form;
   }
 
@@ -101,8 +111,9 @@ class EntityDecay extends ActivityProcessorBase implements ActivityProcessorInte
       '@decay_type' => $this->configuration['decay_type'],
       '@decay' => $this->configuration['decay'],
       '@decay_granularity' => $this->configuration['decay_granularity'],
+      '@decay_threshold' => $this->configuration['decay_threshold'],
     ];
-    return $this->t('<b>@plugin_name:</b> <br> Type: @decay_type <br> Decay: @decay <br> Granularity: @decay_granularity <br>', $replacements);
+    return $this->t('<b>@plugin_name:</b> <br> Type: @decay_type <br> Decay: @decay <br> Granularity: @decay_granularity <br> Threshold: @decay_threshold <br>', $replacements);
   }
 
   /**
@@ -123,7 +134,6 @@ class EntityDecay extends ActivityProcessorBase implements ActivityProcessorInte
         $records = $this->recordsToDecay($tracker);
         if (!empty($records)) {
           foreach ($records as $record) {
-
             switch ($this->configuration['decay_type']) {
               case 'exponential':
                 // Exponential Decay.
@@ -132,18 +142,19 @@ class EntityDecay extends ActivityProcessorBase implements ActivityProcessorInte
 
                 // Exponential Decay function.
                 $activity_value = ceil($record->getActivityValue() * pow(exp(1), (-$decay_rate * (($decay_granularity / 60) / 60) / 24)));
-
-                // @TODO: add threshold value and verify before apply decay.
                 $record->setActivityValue((int) $activity_value);
-                $this->activityRecordStorage->decayActivityRecord($record);
+                if ($record->getActivityValue() > $this->configuration['decay_threshold']) {
+                  $this->activityRecordStorage->decayActivityRecord($record);
+                }
                 break;
 
               case 'linear':
                 $initial_activity = $tracker->getProcessorPlugin('entity_create')->configuration["activity_creation"];
                 $activity_decay = $initial_activity * ($this->configuration['decay'] / 100);
                 $record->decreaseActivity($activity_decay);
-
-                $this->activityRecordStorage->decayActivityRecord($record);
+                if ($record->getActivityValue() > $this->configuration['decay_threshold']) {
+                  $this->activityRecordStorage->decayActivityRecord($record);
+                }
                 break;
             }
           }
